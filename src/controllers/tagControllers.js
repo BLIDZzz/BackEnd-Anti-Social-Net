@@ -1,4 +1,5 @@
 const Tag = require("../models/tag");
+const Post = require("../models/post");
 
 const getTags = async (req, res) => {
   try {
@@ -41,9 +42,34 @@ const updateTag = async (req, res) => {
   }
 };
 
+const deleteTag = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const posts = await Post.find({ tags: id });
+    for (let i = 0; i < posts.length; i++) {
+      const nuevosTags = [];
+      for (let j = 0; j < posts[i].tags.length; j++) {
+        if (posts[i].tags[j].toString() !== id) {
+          nuevosTags.push(posts[i].tags[j]);
+        }
+      }
+      posts[i].tags = nuevosTags;
+      await posts[i].save();
+    }
+
+    await Tag.deleteOne({ _id: id });
+
+    res.status(200).json({ message: "Tag eliminado" });
+  } catch (error) {
+    res.status(500).json({ message: "Error al eliminar el tag" });
+  }
+};
+
 module.exports = {
   getTags,
   getTag,
   createTag,
   updateTag,
+  deleteTag,
 };
