@@ -19,7 +19,31 @@ const createTag = async (req, res) => {
   }
 };
 
+const getTag = async (req, res) => {
+  try {
+    const tag = await Tag.findById(req.params.id);
+    res.status(200).json(tag);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener el tag" });
+  }
+};
+
+const updateTag = async (req, res) => {
+  try {
+    const tag = await Tag.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+    res.status(200).json(tag);
+  } catch (error) {
+    res.status(500).json({ message: "Error al actualizar el tag" });
+  }
+};
+
 module.exports = {
   getTags,
+  getTag,
   createTag,
+  updateTag,
 };
