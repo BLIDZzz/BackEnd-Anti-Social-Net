@@ -28,8 +28,22 @@ const getUser = async (req, res) => {
   }
 };
 
+const updateUser = async (req, res) => {
+  try {
+    const user = await User.findOneAndUpdate(
+      { _id: req.params.id },
+      { $set: req.body },
+      { new: true, runValidators: true }
+    );
+    res.status(200).json(user);
+  } catch (error) {
+    res.status(500).json({ message: "Error al actualizar el usuario" });
+  }
+};
+
 module.exports = {
   getUsers,
   getUser,
   createUser,
+  updateUser,
 };
