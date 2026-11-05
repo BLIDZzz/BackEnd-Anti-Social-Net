@@ -1,6 +1,6 @@
 const { Router } = require("express");
 const router = Router();
-const { getUsers, getUser, createUser, updateUser } = require("../controllers/userControllers");
+const { getUsers, getUser, createUser, updateUser, deleteUser } = require("../controllers/userControllers");
 const validarSchema = require("../middlewares/validarSchema");
 const userSchema = require("../schemas/userSchema");
 const validarReferencia = require("../middlewares/validarReferencia");
@@ -11,5 +11,6 @@ router.get("/", getUsers);
 router.get("/:id", validarReferencia(User, "id", "params"), getUser);
 router.post("/", validarSchema(userSchema), validarNickName, createUser);
 router.put("/:id", validarReferencia(User, "id", "params"), validarSchema(userSchema), validarNickName, updateUser);
+router.delete("/:id", validarReferencia(User, "id", "params"), deleteUser);
 
 module.exports = router;
