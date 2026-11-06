@@ -1,4 +1,4 @@
-const Comment = require('../models/Comment');
+const Comment = require('../models/comment');
 
 /**
  * Middleware para buscar un comentario por su ID e inyectarlo en req.comentario.

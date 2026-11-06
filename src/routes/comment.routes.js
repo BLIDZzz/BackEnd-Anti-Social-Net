@@ -8,42 +8,44 @@ const {
   deleteComment,
 } = require('../controllers/comment.controller');
 
-// Middlewares
-const validarSchema = require('../middlewares/validarSchema');
-const validarObjectId = require('../middlewares/validarObjectId');
-const buscarComentarioPorId = require('../middlewares/buscarComentarioPorId');
-const {
-  createCommentSchema,
-  updateCommentSchema,
-} = require('../schemas/comment.schema');
+const User = require('../models/user');
+const Post = require('../models/post');
+const Comment = require('../models/comment');
 
-// 📌 POST /comments -> Crear comentario
+const validarSchema = require('../middlewares/validarSchema');
+const validarReferencia = require('../middlewares/validarReferencia');
+const buscarComentarioPorId = require('../middlewares/buscarComentarioPorId');
+const { createCommentSchema, updateCommentSchema } = require('../schemas/comment.schema');
+
+// 📌 POST /comments
 router.post(
   '/',
   validarSchema(createCommentSchema),
+  validarReferencia(User, 'user'),
+  validarReferencia(Post, 'post'),
   createComment
 );
 
-// 📌 GET /comments/post/:postId -> Obtener comentarios de un post
+// 📌 GET /comments/post/:postId
 router.get(
   '/post/:postId',
-  validarObjectId('postId'),
+  validarReferencia(Post, 'postId', 'params'),
   getCommentsByPost
 );
 
-// 📌 PUT /comments/:id -> Actualizar comentario
+// 📌 PUT /comments/:id
 router.put(
   '/:id',
-  validarObjectId('id'),
+  validarReferencia(Comment, 'id', 'params'),
   buscarComentarioPorId,
   validarSchema(updateCommentSchema),
   updateComment
 );
 
-// 📌 DELETE /comments/:id -> Eliminar comentario
+// 📌 DELETE /comments/:id
 router.delete(
   '/:id',
-  validarObjectId('id'),
+  validarReferencia(Comment, 'id', 'params'),
   buscarComentarioPorId,
   deleteComment
 );
