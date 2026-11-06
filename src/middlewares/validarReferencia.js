@@ -26,7 +26,7 @@ const validarReferencia  = (Modelo, campo, origen) => {
             for (let i = 0; i < ids.length; i++) {
                 if (!esObjetoIdValido(ids[i])) {
                     return res.status(400).json({
-                        message: `El Id de ${campo} debe ser un Id válido`
+                        message: `El identificador de ${campo} no tiene un formato válido.`
                     });
                 }
             }
@@ -46,7 +46,7 @@ const validarReferencia  = (Modelo, campo, origen) => {
                 
                 if (!encontrado) {
                     return res.status(404).json({
-                        message: 'No existe el documento de ' + campo
+                        message: `No se encontró ningún registro asociado al ${campo} proporcionado.`
                     })
                 }
             }
