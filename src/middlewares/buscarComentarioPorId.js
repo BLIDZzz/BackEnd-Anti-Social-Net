@@ -11,7 +11,7 @@ const buscarComentarioPorId = async (req, res, next) => {
 
     if (!comentario) {
       return res.status(404).json({
-        error: 'Comentario no encontrado',
+        message: 'Comentario no encontrado',
       });
     }
 
@@ -19,8 +19,8 @@ const buscarComentarioPorId = async (req, res, next) => {
     req.comentario = comentario;
     next();
   } catch (error) {
-    return res.status(500).json({
-      error: 'Error interno del servidor al buscar el comentario',
+     return res.status(500).json({
+      message: 'Error interno del servidor al buscar el comentario',
     });
   }
 };
