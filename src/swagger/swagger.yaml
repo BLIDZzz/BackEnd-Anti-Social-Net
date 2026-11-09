@@ -221,6 +221,61 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+    put:
+      summary: Actualizar un usuario existente
+      tags:
+        - Users
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                nickName:
+                  type: string
+                  minLength: 3
+                  maxLength: 30
+                  example: alehki_dev
+                name:
+                  type: string
+                  example: Alejandro
+                email:
+                  type: string
+                  format: email
+                  example: ale@example.com
+      responses:
+        '200':
+          description: Usuario actualizado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: ID inválido o validación fallida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Conflicto - El nickName ya está en uso
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
     delete:
       summary: Eliminar un usuario
       tags:
@@ -345,6 +400,47 @@ paths:
         '404':
           description: Publicación no encontrada
 
+    put:
+      summary: Actualizar una publicación existente
+      tags:
+        - Posts
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  minLength: 1
+                  example: Descripción actualizada.
+      responses:
+        '200':
+          description: Publicación actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: ID inválido o datos incorrectos
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Publicación no encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
     delete:
       summary: Eliminar una publicación
       tags:
@@ -432,7 +528,7 @@ paths:
           description: IDs inválidos
         '404':
           description: Publicación o Imagen no encontrada
-
+          
   /posts/{id}/comments:
     post:
       summary: Agregar un comentario a una publicación
@@ -579,3 +675,191 @@ paths:
           description: Validación fallida
         '409':
           description: La etiqueta ya existe
+
+  /tags/{id}:
+    get:
+      summary: Obtener etiqueta por ID
+      tags:
+        - Tags
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Datos de la etiqueta
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          description: ID inválido
+        '404':
+          description: Etiqueta no encontrada
+
+    put:
+      summary: Actualizar una etiqueta
+      tags:
+        - Tags
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - name
+              properties:
+                name:
+                  type: string
+                  minLength: 2
+                  example: mongoose
+      responses:
+        '200':
+          description: Etiqueta actualizada correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Tag'
+        '400':
+          description: ID o datos inválidos
+        '404':
+          description: Etiqueta no encontrada
+        '409':
+          description: Conflicto - El nombre de la etiqueta ya existe
+
+    delete:
+      summary: Eliminar una etiqueta
+      tags:
+        - Tags
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Etiqueta eliminada correctamente
+        '400':
+          description: ID inválido
+        '404':
+          description: Etiqueta no encontrada
+
+  /comments:
+    post:
+      summary: Crear un comentario (general/independiente)
+      tags:
+        - Comments
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user
+                - content
+              properties:
+                user:
+                  $ref: '#/components/schemas/ObjectId'
+                content:
+                  type: string
+                  minLength: 1
+                  example: Comentario general.
+      responses:
+        '201':
+          description: Comentario creado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: Datos de entrada inválidos
+
+  /comments/post/{postId}:
+    get:
+      summary: Obtener comentarios de una publicación específica
+      tags:
+        - Comments
+      parameters:
+        - name: postId
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Lista de comentarios filtrados por antigüedad máxima
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '400':
+          description: ID de post inválido
+        '404':
+          description: Publicación no encontrada
+
+  /comments/{id}:
+    put:
+      summary: Actualizar un comentario
+      tags:
+        - Comments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - content
+              properties:
+                content:
+                  type: string
+                  minLength: 1
+                  example: Contenido editado del comentario.
+      responses:
+        '200':
+          description: Comentario actualizado correctamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '400':
+          description: ID o contenido inválido
+        '404':
+          description: Comentario no encontrado
+
+    delete:
+      summary: Eliminar un comentario
+      tags:
+        - Comments
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Comentario eliminado correctamente
+        '400':
+          description: ID inválido
+        '404':
+          description: Comentario no encontrado

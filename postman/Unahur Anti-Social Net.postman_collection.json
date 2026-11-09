@@ -326,9 +326,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 400', function () {",
-                  "    pm.response.to.have.status(400);",
-                  "});"
+                  "pm.test('Responde 400', function () {\n    pm.response.to.have.status(400);\n});"
                 ]
               }
             }
@@ -338,7 +336,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nickName\": \"usuario2\"\n}",
+              "raw": "{\n  \"nickName\": \"{{userId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1115,7 +1113,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"Este_es_mi_comentario_de_prueba_{{$timestamp}}\",\n  \"userId\": \"{{userId}}\",\n  \"postId\": \"{{postId}}\"\n}",
+              "raw": "{\n  \"text\": \"Este_es_mi_comentario_de_prueba_{{$timestamp}}\",\n  \"userId\": \"{{user}}\",\n  \"postId\": \"{{post}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1252,7 +1250,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": \"{{userId}}\",\n  \"postId\": \"{{postId}}\"\n}",
+              "raw": "{\n  \"userId\": \"{{user}}\",\n  \"postId\": \"{{post}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1289,7 +1287,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"\",\n  \"userId\": \"{{secondUserId}}\",\n  \"postId\": \"{{postId}}\"\n}",
+              "raw": "{\n  \"text\": \"\",\n  \"userId\": \"{{secondUserId}}\",\n  \"postId\": \"{{post}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1326,7 +1324,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"userId\": \"507f1f77bcf86cd799439011\",\n  \"postId\": \"{{postId}}\"\n}",
+              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"userId\": \"507f1f77bcf86cd799439011\",\n  \"postId\": \"{{post}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1363,7 +1361,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"userId\": \"abc\",\n  \"postId\": \"{{postId}}\"\n}",
+              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"userId\": \"abc\",\n  \"postId\": \"{{post}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1437,7 +1435,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"userId\": \"{{userId}}\",\n  \"postId\": \"abc\"\n}",
+              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"userId\": \"{{user}}\",\n  \"postId\": \"abc\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1628,36 +1626,6 @@
               ],
               "path": [
                 "tags"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Listar posts de un Tag",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 200', function () {\n    pm.response.to.have.status(200);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/tags/{{tagId}}/posts",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "tags",
-                "{{tagId}}",
-                "posts"
               ]
             }
           },
@@ -1887,9 +1855,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 400', function () {",
-                  "    pm.response.to.have.status(400);",
-                  "});"
+                  "pm.test('Responde 400', function () {\n    pm.response.to.have.status(400);\n});"
                 ]
               }
             }
@@ -1899,7 +1865,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"programacion-web\"\n}",
+              "raw": "{\n  \"name\": \"{{tagId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2162,60 +2128,16 @@
             }
           },
           "response": []
-        }
-      ]
-    },
-    {
-      "name": "Followers",
-      "item": [
-        {
-          "name": "Seguir a un usuario",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 200', function () {\n    pm.response.to.have.status(200);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"followerId\": \"{{userId}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{secondUserId}}/follow",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "{{secondUserId}}",
-                "follow"
-              ]
-            }
-          },
-          "response": []
         },
         {
-          "name": "Listar seguidores de un usuario",
+          "name": "Listar etiqueta por ID",
           "event": [
             {
               "listen": "test",
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 200', function () {\n    pm.response.to.have.status(200);\n});"
+                  "pm.test('Responde 200', function () {\r\n    pm.response.to.have.status(200);\r\n});"
                 ]
               }
             }
@@ -2223,69 +2145,9 @@
           "request": {
             "method": "GET",
             "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users/{{secondUserId}}/followers",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "{{secondUserId}}",
-                "followers"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Listar a quiénes sigue un usuario",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 200', function () {\n    pm.response.to.have.status(200);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}/following",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "{{userId}}",
-                "following"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Caso de Error - Seguir a un usuario que ya se sigue",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 400', function () {\n    pm.response.to.have.status(400);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"followerId\": \"{{userId}}\"\n}",
+              "raw": "{\n  \"description\": \"Post con usuario inexistente\",\n  \"userId\": \"{{user}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2293,349 +2155,16 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/users/{{secondUserId}}/follow",
+              "raw": "{{baseUrl}}//tags/{{tagId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "users",
-                "{{secondUserId}}",
-                "follow"
+                "",
+                "tags",
+                "{{tagId}}"
               ]
             }
-          },
-          "response": []
-        },
-        {
-          "name": "Caso de Error - Seguirse a sí mismo",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 400', function () {\n    pm.response.to.have.status(400);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"followerId\": \"{{userId}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{userId}}/follow",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "{{userId}}",
-                "follow"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Caso de Error - Seguir sin followerId",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 400', function () {\n    pm.response.to.have.status(400);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{secondUserId}}/follow",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "{{secondUserId}}",
-                "follow"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Caso de Error - Seguir con un seguidor inexistente",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 404', function () {\n    pm.response.to.have.status(404);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"followerId\": \"507f1f77bcf86cd799439011\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{secondUserId}}/follow",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "{{secondUserId}}",
-                "follow"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Caso de Error - Seguir a un usuario inexistente",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 404', function () {\n    pm.response.to.have.status(404);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"followerId\": \"{{userId}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/507f1f77bcf86cd799439011/follow",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "507f1f77bcf86cd799439011",
-                "follow"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Caso de Error - Listar seguidores con ID no numérico",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 400', function () {",
-                  "    pm.response.to.have.status(400);",
-                  "});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "GET",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/users/abc/followers",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "abc",
-                "followers"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Dejar de seguir a un usuario",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 200', function () {\n    pm.response.to.have.status(200);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"followerId\": \"{{userId}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{secondUserId}}/unfollow",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "{{secondUserId}}",
-                "unfollow"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Caso de Error - Dejar de seguir a quien no se sigue",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 400', function () {\n    pm.response.to.have.status(400);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "DELETE",
-            "header": [],
-            "body": {
-              "mode": "raw",
-              "raw": "{\n  \"followerId\": \"{{userId}}\"\n}",
-              "options": {
-                "raw": {
-                  "language": "json"
-                }
-              }
-            },
-            "url": {
-              "raw": "{{baseUrl}}/users/{{secondUserId}}/unfollow",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "users",
-                "{{secondUserId}}",
-                "unfollow"
-              ]
-            }
-          },
-          "response": []
-        }
-      ]
-    },
-    {
-      "name": "Subida de archivos (manual)",
-      "item": [
-        {
-          "name": "Caso de Error - Subir imagen sin archivo",
-          "event": [
-            {
-              "listen": "test",
-              "script": {
-                "type": "text/javascript",
-                "exec": [
-                  "pm.test('Responde 400', function () {\n    pm.response.to.have.status(400);\n});"
-                ]
-              }
-            }
-          ],
-          "request": {
-            "method": "POST",
-            "header": [],
-            "url": {
-              "raw": "{{baseUrl}}/posts/{{postId}}/images/upload",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "posts",
-                "{{postId}}",
-                "images",
-                "upload"
-              ]
-            }
-          },
-          "response": []
-        },
-        {
-          "name": "Subir imagen desde un archivo (MANUAL: elegir un .png/.jpg en el campo imagen)",
-          "request": {
-            "method": "POST",
-            "header": [],
-            "body": {
-              "mode": "formdata",
-              "formdata": [
-                {
-                  "key": "imagen",
-                  "type": "file",
-                  "value": ""
-                }
-              ]
-            },
-            "url": {
-              "raw": "{{baseUrl}}/posts/{{postId}}/images/upload",
-              "host": [
-                "{{baseUrl}}"
-              ],
-              "path": [
-                "posts",
-                "{{postId}}",
-                "images",
-                "upload"
-              ]
-            },
-            "description": "Requiere elegir un archivo (jpeg, jpg, png o webp, máximo 2MB) en el campo 'imagen'. No se puede automatizar, por eso va aparte."
           },
           "response": []
         }
@@ -2792,48 +2321,6 @@
           "response": []
         }
       ]
-    },
-    {
-      "name": "Verificar API",
-      "event": [
-        {
-          "listen": "test",
-          "script": {
-            "type": "text/javascript",
-            "exec": [
-              "pm.test('Responde 200', function () {",
-              "    pm.response.to.have.status(200);",
-              "});"
-            ]
-          }
-        }
-      ],
-      "protocolProfileBehavior": {
-        "disableBodyPruning": true
-      },
-      "request": {
-        "method": "GET",
-        "header": [],
-        "body": {
-          "mode": "raw",
-          "raw": "",
-          "options": {
-            "raw": {
-              "language": "json"
-            }
-          }
-        },
-        "url": {
-          "raw": "{{baseUrl}}/",
-          "host": [
-            "{{baseUrl}}"
-          ],
-          "path": [
-            ""
-          ]
-        }
-      },
-      "response": []
     }
   ],
   "variable": [
