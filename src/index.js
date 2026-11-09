@@ -1,14 +1,24 @@
 require("dotenv").config();
 
 const express = require("express");
+const fs = require("fs");
+const path = require("path"); 
 const connectDB = require("./config/database");
 const userRoutes = require("./routes/userRoutes");
 const tagRoutes = require("./routes/tagRoutes");
+const YAML = require('js-yaml');
+const swaggerUi = require('swagger-ui-express');
 
 const app = express();
 
 const PORT = process.env.PORT || 3000;
 const COMMENT_MAX_AGE_MONTHS = Number(process.env.COMMENT_MAX_AGE_MONTHS);
+
+const swaggerDocument = YAML.load(
+  fs.readFileSync(path.join(__dirname, 'swagger', 'swagger.yaml'), 'utf8')
+);
+
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 app.use(express.json());
 app.use("/users", userRoutes);
