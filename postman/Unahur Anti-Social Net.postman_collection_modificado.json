@@ -49,7 +49,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 201', function () {\n    pm.response.to.have.status(201);\n\n    // 1. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 2. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"userId\", jsonData.id);\n});"
+                  "pm.test('Responde 201', function () {\n    pm.response.to.have.status(201);\n\n    // 1. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 2. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"userId\", jsonData._id);\n});"
                 ]
               }
             }
@@ -86,7 +86,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 201', function () {\n    pm.response.to.have.status(201);\n\n    // 1. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 2. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"secondUserId\", jsonData.id);\n});"
+                  "pm.test('Responde 201', function () {\n    pm.response.to.have.status(201);\n\n    // 1. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 2. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"secondUserId\", jsonData._id);\n});"
                 ]
               }
             }
@@ -507,7 +507,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 201', function () {\n    // 1. Validar que la respuesta sea 201\n    pm.response.to.have.status(201);\n\n    // 2. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 3. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"postId\", jsonData.id);\n});"
+                  "pm.test('Responde 201', function () {\n    // 1. Validar que la respuesta sea 201\n    pm.response.to.have.status(201);\n\n    // 2. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 3. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"postId\", jsonData._id);\n});"
                 ]
               }
             }
@@ -819,7 +819,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 201', function () {\n    // 1. Validar que la respuesta sea 201\n    pm.response.to.have.status(201);\n\n    // 2. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 3. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"image\", jsonData.id);\n});"
+                  "pm.test('Responde 201', function () {\n    // 1. Validar que la respuesta sea 201\n    pm.response.to.have.status(201);\n\n    // 2. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 3. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"image\", jsonData._id);\n});"
                 ]
               }
             }
@@ -1105,7 +1105,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 201', function () {\n    // 1. Validar que la respuesta sea 201\n    pm.response.to.have.status(201);\n\n    // 2. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 3. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"commentId\", jsonData.id);\n});"
+                  "pm.test('Responde 201', function () {\n    // 1. Validar que la respuesta sea 201\n    pm.response.to.have.status(201);\n\n    // 2. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 3. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"commentId\", jsonData._id);\n});"
                 ]
               }
             }
@@ -1520,13 +1520,13 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}/comments/{{ommentId}}",
+              "raw": "{{baseUrl}}/comments/{{commentId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
                 "comments",
-                "{{ommentId}}"
+                "{{commentId}}"
               ]
             }
           },
@@ -1604,7 +1604,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 201', function () {\n    // 1. Validar que la respuesta sea 201\n    pm.response.to.have.status(201);\n\n    // 2. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 3. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"tagId\", jsonData.id);\n});"
+                  "pm.test('Responde 201', function () {\n    // 1. Validar que la respuesta sea 201\n    pm.response.to.have.status(201);\n\n    // 2. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 3. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"tagId\", jsonData._id);\n});"
                 ]
               }
             }
@@ -2840,6 +2840,14 @@
     {
       "key": "baseUrl",
       "value": "http://localhost:3000"
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "secondUserId",
+      "value": ""
     }
   ]
 }

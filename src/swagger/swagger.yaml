@@ -11,19 +11,13 @@ info:
   version: 2.0.0
 
 servers:
-  - url: http://localhost:{port}/api/v1
+  - url: http://localhost:{port}
     description: Servidor Local de Desarrollo
     variables:
       port:
         default: "3000"
 
 components:
-  securitySchemes:
-    bearerAuth:
-      type: http
-      scheme: bearer
-      bearerFormat: JWT
-
   schemas:
     ObjectId:
       type: string
