@@ -152,7 +152,12 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 200', function () {\n    pm.response.to.have.status(200);\n});"
+                  "pm.test('Responde 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "",
+                  "    var jsonData = pm.response.json();",
+                  "    pm.collectionVariables.set(\"userNick\", jsonData.nickName);",
+                  "});"
                 ]
               }
             }
@@ -190,7 +195,9 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 400', function () {\n    pm.response.to.have.status(400);\n\n    pm.collectionVariables.set(\"userNick\", jsonData.nickName);\n});"
+                  "pm.test('Responde 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
                 ]
               }
             }
