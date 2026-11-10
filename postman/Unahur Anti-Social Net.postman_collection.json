@@ -49,7 +49,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 201', function () {\n    pm.response.to.have.status(201);\n\n    // 1. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 2. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"userId\", jsonData._id);\n});"
+                  "pm.test('Responde 201', function () {\n    pm.response.to.have.status(201);\n\n    // 1. Parsear la respuesta a JSON\n    var jsonData = pm.response.json();\n\n    // 2. Guardar el valor a nivel de colección\n    pm.collectionVariables.set(\"userId\", jsonData._id);\n\n    pm.collectionVariables.set(\"userNick\", jsonData.nickName);\n});"
                 ]
               }
             }
@@ -190,7 +190,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 400', function () {\n    pm.response.to.have.status(400);\n});"
+                  "pm.test('Responde 400', function () {\n    pm.response.to.have.status(400);\n\n    pm.collectionVariables.set(\"userNick\", jsonData.nickName);\n});"
                 ]
               }
             }
@@ -200,7 +200,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nickName\": \"usuario_modificado\"\n}",
+              "raw": "{\n  \"nickName\": \"{{userNick}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -336,7 +336,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"nickName\": \"{{userId}}\"\n}",
+              "raw": "{\n  \"nickName\": \"{{userNick}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -515,7 +515,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"description\": \"Mi primera_publicación_de_prueba_{{$timestamp}}\",\n  \"userId\": \"{{userId}}\"\n}",
+              "raw": "{\n  \"description\": \"Mi primera_publicación_de_prueba_{{$timestamp}}\",\n  \"user\": \"{{userId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -756,7 +756,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"description\": \"Post con usuario inexistente\",\n  \"userId\": \"507f1f77bcf86cd799439011\"\n}",
+              "raw": "{\n  \"description\": \"Post con usuario inexistente\",\n  \"user\": \"507f1f77bcf86cd799439011\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1113,7 +1113,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"Este_es_mi_comentario_de_prueba_{{$timestamp}}\",\n  \"userId\": \"{{user}}\",\n  \"postId\": \"{{post}}\"\n}",
+              "raw": "{\n  \"text\": \"Este_es_mi_comentario_de_prueba_{{$timestamp}}\",\n  \"user\": \"{{userId}}\",\n  \"post\": \"{{postId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1250,7 +1250,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"userId\": \"{{user}}\",\n  \"postId\": \"{{post}}\"\n}",
+              "raw": "{\n  \"user\": \"{{userId}}\",\n  \"post\": \"{{postId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1287,7 +1287,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"\",\n  \"userId\": \"{{secondUserId}}\",\n  \"postId\": \"{{post}}\"\n}",
+              "raw": "{\n  \"text\": \"\",\n  \"user\": \"{{secondUserId}}\",\n  \"post\": \"{{postId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1324,7 +1324,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"userId\": \"507f1f77bcf86cd799439011\",\n  \"postId\": \"{{post}}\"\n}",
+              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"user\": \"507f1f77bcf86cd799439011\",\n  \"post\": \"{{postId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1361,7 +1361,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"userId\": \"abc\",\n  \"postId\": \"{{post}}\"\n}",
+              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"user\": \"abc\",\n  \"post\": \"{{postId}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1398,7 +1398,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"userId\": \"{{secondUserId}}\",\n  \"postId\": \"507f1f77bcf86cd799439011\"\n}",
+              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"user\": \"{{secondUserId}}\",\n  \"post\": \"507f1f77bcf86cd799439011\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1435,7 +1435,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"userId\": \"{{user}}\",\n  \"postId\": \"abc\"\n}",
+              "raw": "{\n  \"text\": \"Comentario de prueba\",\n  \"user\": \"{{userId}}\",\n  \"post\": \"abc\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1639,7 +1639,7 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 200', function () {\n    pm.response.to.have.status(200);\n});"
+                  "pm.test('Responde 200', function () {\n    pm.response.to.have.status(200);\n\n    pm.collectionVariables.set(\"tagName\", jsonData.name);\n});"
                 ]
               }
             }
@@ -1865,7 +1865,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"{{tagId}}\"\n}",
+              "raw": "{\n  \"name\": \"{{tagName}}\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2147,7 +2147,7 @@
             "header": [],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"description\": \"Post con usuario inexistente\",\n  \"userId\": \"{{user}}\"\n}",
+              "raw": "",
               "options": {
                 "raw": {
                   "language": "json"
@@ -2155,12 +2155,11 @@
               }
             },
             "url": {
-              "raw": "{{baseUrl}}//tags/{{tagId}}",
+              "raw": "{{baseUrl}}/tags/{{tagId}}",
               "host": [
                 "{{baseUrl}}"
               ],
               "path": [
-                "",
                 "tags",
                 "{{tagId}}"
               ]
