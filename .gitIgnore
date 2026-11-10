@@ -1,1 +1,4 @@
 node_modules
+# Imágenes subidas por los usuarios
+uploads/posts/*
+!uploads/posts/.gitkeep
