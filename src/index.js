@@ -38,12 +38,18 @@ app.locals.commentMaxAgeMonths = COMMENT_MAX_AGE_MONTHS;
 // 3. Middlewares globales (¡SIEMPRE antes de las rutas!)
 app.use(express.json());
 
+// 3.1 Permitir acceder a las imágenes almacenadas en uploads
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+
 // 4. Montaje de Rutas
 app.use("/users", userRoutes);
 app.use("/tags", tagRoutes);
 app.use("/comments", commentRoutes);
 app.use('/posts', postRoutes);
 app.use('/posts', postImagesRoutes);
+
+// 4.1 Middleware para manejar errores de imágenes
+app.use(manejarErrorImagenes);
 
 // 5. Función de inicio del servidor
 const startServer = async () => {

@@ -14,12 +14,15 @@ const buscarImagePost = require("../middlewares/buscarImagePost")
 const Post = require('../models/post');
 const { postImageSchema } = require('../schemas/post_images.schema');
 
+const subirImagen = require('../middlewares/subirImagen');
+
 // Agregar una imagen a una publicación
 router.post(
     '/:id/images',
     validarReferencia(Post, 'id', 'params'),
     buscarPostPorId,
     validarSchema(postImageSchema),
+    subirImagen.single("image"),
     createPostImage
 );
 
