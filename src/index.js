@@ -11,6 +11,8 @@ const tagRoutes = require("./routes/tagRoutes");
 const YAML = require('js-yaml');
 const swaggerUi = require('swagger-ui-express');
 const commentRoutes = require("./routes/comment.routes");
+const postRoutes = require("./routes/post.routes")
+const postImagesRoutes = require("./routes/post_images.routes")
 
 // 2. Validaciones tempranas de variables de entorno
 if (!process.env.MONGO_URI) {
@@ -40,6 +42,8 @@ app.use(express.json());
 app.use("/users", userRoutes);
 app.use("/tags", tagRoutes);
 app.use("/comments", commentRoutes);
+app.use('/posts', postRoutes);
+app.use('/posts', postImagesRoutes);
 
 // 5. Función de inicio del servidor
 const startServer = async () => {

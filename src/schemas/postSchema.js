@@ -1,5 +1,6 @@
 const Joi = require('joi');
 
+// Validar los datos para crear una publicacion
 const postSchema = Joi.object({
     description: Joi.string().required().trim(),
     user: Joi.string().required().trim(),
@@ -13,4 +14,12 @@ const postSchema = Joi.object({
     )
 });
 
-module.exports = postSchema;
+// Validar los datos para agregar una imagen a una publicacion
+const postImageSchema = Joi.object({
+    url: Joi.string().required().trim()
+});
+
+module.exports = {
+    postSchema,
+    postImageSchema
+};
