@@ -7,7 +7,7 @@ const validarReferencia = require("../middlewares/validarReferencia");
 const User = require("../models/user");
 const validarNickName = require("../middlewares/validarNickName");
 const followSchema = require("../schemas/followSchema");
-const { followUser, unfollowUser } = require("../controllers/followControllers");
+const { followUser, unfollowUser, getFollowers, getFollowing } = require("../controllers/followControllers");
 
 router.get("/", getUsers);
 router.get("/:id", validarReferencia(User, "id", "params"), getUser);
@@ -16,5 +16,7 @@ router.put("/:id", validarReferencia(User, "id", "params"), validarSchema(userSc
 router.delete("/:id", validarReferencia(User, "id", "params"), deleteUser);
 router.post("/:id/follow", validarReferencia(User, "id", "params"), validarSchema(followSchema), validarReferencia(User, "followerId"), followUser);
 router.delete("/:id/unfollow", validarReferencia(User, "id", "params"), validarSchema(followSchema), validarReferencia(User, "followerId"), unfollowUser);
+router.get("/:id/followers", validarReferencia(User, "id", "params"), getFollowers);
+router.get("/:id/following", validarReferencia(User, "id", "params"), getFollowing);
 
 module.exports = router;

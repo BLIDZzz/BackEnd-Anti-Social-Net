@@ -53,7 +53,27 @@ const unfollowUser = async (req, res) => {
   }
 };
 
+const getFollowers = async (req, res) => {
+  try {
+    const followers = await User.find({ following: req.params.id }).select("_id nickName");
+    res.status(200).json(followers);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener los seguidores" });
+  }
+};
+
+const getFollowing = async (req, res) => {
+  try {
+    const user = await User.findById(req.params.id).populate("following", "_id nickName");
+    res.status(200).json(user.following);
+  } catch (error) {
+    res.status(500).json({ message: "Error al obtener los seguidos" });
+  }
+};
+
 module.exports = {
   followUser,
   unfollowUser,
+  getFollowers,
+  getFollowing,
 };
