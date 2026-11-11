@@ -160,6 +160,17 @@ Los identificadores son `ObjectId` de MongoDB (24 caracteres hexadecimales).
 | PUT | `/users/:id` | Modifica un usuario | `{ "nickName": "guille2" }` |
 | DELETE | `/users/:id` | Elimina un usuario, sus posts y los comentarios relacionados | — |
 
+### Seguidores (bonus 2) — `/users`
+
+| Método | Ruta | Descripción | Body |
+|---|---|---|---|
+| POST | `/users/:id/follow` | `followerId` pasa a seguir al usuario `:id` | `{ "followerId": "<id>" }` |
+| DELETE | `/users/:id/unfollow` | `followerId` deja de seguir al usuario `:id` | `{ "followerId": "<id>" }` |
+| GET | `/users/:id/followers` | Lista quiénes siguen al usuario | — |
+| GET | `/users/:id/following` | Lista a quiénes sigue el usuario | — |
+
+Un usuario no puede seguirse a sí mismo ni seguir dos veces al mismo usuario (responde `400`).
+
 ### Tags — `/tags`
 
 | Método | Ruta | Descripción | Body |
@@ -289,3 +300,38 @@ La colección está en `postman/Unahur Anti-Social Net.postman_collection.json`.
 3. Ejecutarla en orden: los primeros pedidos crean los datos (usuarios, post, tag, comentario) que usan los siguientes, y la carpeta **Eliminaciones** los borra al final.
 
 Los nombres de prueba llevan `{{$timestamp}}`, así que la colección se puede correr varias veces sin vaciar la base.
+
+## Bonus 2: seguidores (followers)
+
+### Cómo lo modelamos en MongoDB
+
+Cada usuario guarda un array `following` con los `ObjectId` de los usuarios que sigue:
+
+```js
+{
+  _id: ObjectId("..."),
+  nickName: "guille",
+  following: [ObjectId("..."), ObjectId("...")]
+}
+```
+
+- **A quiénes sigue** un usuario: se lee su array `following` y se completa con `populate`.
+- **Quiénes lo siguen**: se buscan los usuarios que tienen su id en el array (`User.find({ following: id })`).
+
+La relación se guarda **de un solo lado** (en el que sigue). Si también guardáramos un array `followers` en el seguido, cada follow obligaría a modificar dos documentos y a mantenerlos sincronizados.
+
+Al borrar un usuario, la aplicación lo quita del array `following` de todos los que lo seguían, porque MongoDB no lo hace solo.
+
+### Comparación con el modelo relacional
+
+En el TP1 (Sequelize) la relación era una **tabla intermedia** `UserFollowers` con dos claves foráneas a `Users` (con dos claves foráneas a Users), definida con `belongsToMany` del modelo consigo mismo.
+
+| | Relacional (TP1) | Documental (TP2) |
+|---|---|---|
+| Dónde se guarda | Tabla intermedia `UserFollowers`, una fila por cada follow | Array `following` dentro del documento del usuario |
+| A quiénes sigue | `JOIN` con la tabla intermedia | Leer el array (`populate` para traer los datos) |
+| Quiénes lo siguen | `JOIN` por la otra columna | Consulta `find({ following: id })` |
+| Evitar duplicados | Clave primaria compuesta en la tabla intermedia | Lo controla la aplicación antes de agregar |
+| Al borrar un usuario | `ON DELETE CASCADE` borra sus filas automáticamente | La aplicación lo quita de los arrays |
+
+**Límite de esta solución:** si un usuario siguiera a muchísimas personas, el array podría crecer hasta acercarse al límite de 16 MB por documento. Para una red social real con ese volumen, convendría una colección aparte `follows` con un documento por relación (`{ follower, following }`), que es lo más parecido a la tabla intermedia del modelo relacional.
