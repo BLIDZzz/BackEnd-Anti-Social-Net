@@ -4,6 +4,7 @@ const express = require("express");
 const fs = require("fs");
 const path = require("path"); 
 const connectDB = require("./config/database");
+const { connectRedis } = require("./config/redis");
 
 // 1. Importación de Rutas
 const userRoutes = require("./routes/userRoutes");
@@ -56,6 +57,7 @@ app.use(manejarErrorImagenes);
 const startServer = async () => {
   try {
     await connectDB();
+    await connectRedis();
     app.listen(PORT, () => {
       console.log(`Servidor escuchando en http://localhost:${PORT}`);
     });

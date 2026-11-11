@@ -57,6 +57,17 @@ const deleteUser = async (req, res) => {
       $or: [{ user: id }, { post: { $in: postIds } }],
     });
     await Post.deleteMany({ user: id });
+    const seguidores = await User.find({ following: id });
+    for (let i = 0; i < seguidores.length; i++) {
+      const nuevosFollowing = [];
+      for (let j = 0; j < seguidores[i].following.length; j++) {
+        if (seguidores[i].following[j].toString() !== id) {
+          nuevosFollowing.push(seguidores[i].following[j]);
+        }
+      }
+      seguidores[i].following = nuevosFollowing;
+      await seguidores[i].save();
+    }
     await User.deleteOne({ _id: id });
 
     res.status(200).json({ message: "Usuario eliminado" });

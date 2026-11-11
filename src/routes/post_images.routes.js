@@ -29,7 +29,6 @@ router.post(
 router.post(
     '/:id/images/upload',
     buscarPostPorId,
-    validarSchema(postImageSchema),
     subirImagen.single("image"),
     uploadPostImage
 );

@@ -6,7 +6,11 @@ const userSchema = new mongoose.Schema({
         required: true,
         unique: true,
         trim: true
-    }
+    },
+    following: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User'
+    }]
 }, {
     timestamps: true
 });

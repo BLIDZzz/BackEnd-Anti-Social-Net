@@ -1,5 +1,9 @@
 const express = require('express');
 const router = express.Router();
+const User = require('../models/user');
+const Post = require('../models/post');
+const Tag = require('../models/tag');
+
 
 const {
     getAllPosts,
@@ -15,8 +19,7 @@ const validarSchema = require('../middlewares/validarSchema');
 const validarReferencia = require('../middlewares/validarReferencia');
 const buscarPostPorId = require('../middlewares/buscarPostPorId');
 
-const User = require('../models/user');
-const { createPostSchema, updatePostSchema } = require('../schemas/postSchema');
+const { postSchema, updatePostSchema } = require('../schemas/postSchema');
 
 // Obtener todas las publicaciones
 router.get('/', getAllPosts);
@@ -32,7 +35,7 @@ router.get(
 // Crear una publicacion
 router.post(
     '/',
-    validarSchema(createPostSchema),
+    validarSchema(postSchema),
     validarReferencia(User, 'user'),
     createPost
 );
@@ -56,7 +59,7 @@ router.delete(
 
 // Asociar un tag a una publicación
 router.post(
-    '/posts/:postId',
+    '/:id/tags',
     validarReferencia(Post, 'postId', 'params'),
     buscarPostPorId,
     validarReferencia(Tag, 'tagId'),
@@ -65,7 +68,7 @@ router.post(
 
 // Quitar un tag de una publicación
 router.delete(
-    '/posts/:postId/:tagId',
+    '/:id/tags/:tagId',
     validarReferencia(Post, 'postId', 'params'),
     validarReferencia(Tag, 'tagId', 'params'),
     buscarPostPorId,
