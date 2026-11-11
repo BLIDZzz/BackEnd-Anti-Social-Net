@@ -4,8 +4,8 @@ const crypto = require('crypto');
 
 // Configurar dónde se guardarán las imágenes
 const storage = multer.diskStorage({
-    // Indicar la carpeta donde se almacenarán los archivos
-    destination: 'uploads/posts/',
+    // Guardar los archivos dentro de src/uploads/posts
+    destination: path.join(__dirname, '..', 'uploads', 'posts'),
 
     // Generar un nombre aleatorio para evitar archivos con nombres repetidos
     filename: (req, file, cb) => {

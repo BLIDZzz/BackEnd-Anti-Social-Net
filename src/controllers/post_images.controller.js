@@ -1,8 +1,31 @@
 const fs = require('fs');
 const path = require('path');
 
-// Agregar una imagen a una publicación
+// Agregar una imagen mediante una URL
 const createPostImage = async (req, res) => {
+    try {
+        const { url } = req.body;
+
+        // Agregar la URL al array de imágenes de la publicación
+        req.post.images.push({ url });
+
+        // Guardar los cambios en MongoDB
+        await req.post.save();
+
+        // Obtener la imagen que acabamos de agregar
+        const imagen = req.post.images[req.post.images.length - 1];
+
+        return res.status(201).json(imagen);
+
+    } catch (error) {
+        return res.status(500).json({
+            message: 'Error interno del servidor al agregar la imagen'
+        });
+    }
+};
+
+// Agregar una imagen a una publicación
+const uploadPostImage  = async (req, res) => {
     try {
         // Comprobar que se haya recibido un archivo
         if (!req.file) {
@@ -49,22 +72,11 @@ const createPostImage = async (req, res) => {
     }
 };
 
-module.exports = {
-    createPostImage
-};
-
-
-// Eliminar una imagen de una publicacion
-
+// Eliminar una imagen de una publicación
 const deletePostImage = async (req, res) => {
     try {
-        // Obtener la ruta del archivo que queremos eliminar
-        const rutaImagen = path.join(
-            process.cwd(),
-            'uploads',
-            'posts',
-            path.basename(req.imagen.url)
-        );
+        // Comprobar si la imagen es un archivo almacenado localmente
+        const esImagenLocal = req.imagen.url.startsWith('/uploads/posts/');
 
         // Eliminar la imagen del array de la publicación
         req.imagen.deleteOne();
@@ -72,13 +84,22 @@ const deletePostImage = async (req, res) => {
         // Guardar los cambios en MongoDB
         await req.post.save();
 
-        // Eliminar el archivo físico del servidor
-        try {
-            await fs.promises.unlink(rutaImagen);
-        } catch (errorArchivo) {
-            // Si el archivo ya no existe, no es necesario hacer nada
-            if (errorArchivo.code !== 'ENOENT') {
-                console.error('No se pudo eliminar la imagen:', errorArchivo);
+        // Si es una imagen local, eliminar también el archivo físico
+        if (esImagenLocal) {
+            const rutaImagen = path.join(
+                __dirname,
+                '..',
+                'uploads',
+                'posts',
+                path.basename(req.imagen.url)
+            );
+
+            try {
+                await fs.promises.unlink(rutaImagen);
+            } catch (errorArchivo) {
+                if (errorArchivo.code !== 'ENOENT') {
+                    console.error('No se pudo eliminar la imagen:', errorArchivo);
+                }
             }
         }
 
@@ -95,5 +116,6 @@ const deletePostImage = async (req, res) => {
 
 module.exports = {
     createPostImage,
+    uploadPostImage,
     deletePostImage
 };

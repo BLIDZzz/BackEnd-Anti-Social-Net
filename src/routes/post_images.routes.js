@@ -3,27 +3,35 @@ const router = express.Router();
 
 const {
     createPostImage,
-    deletePostImage
+    deletePostImage,
+    uploadPostImage
 } = require('../controllers/post_images.controller');
 
 const validarSchema = require('../middlewares/validarSchema');
 const buscarPostPorId = require('../middlewares/buscarPostPorId');
 const validarReferencia = require('../middlewares/validarReferencia');
 const buscarImagePost = require("../middlewares/buscarImagePost")
-
-const Post = require('../models/post');
-const { postImageSchema } = require('../schemas/post_images.schema');
-
 const subirImagen = require('../middlewares/subirImagen');
 
-// Agregar una imagen a una publicación
+const Post = require('../models/post');
+const { postImageSchema } = require('../schemas/postSchema');
+
+// Agregar una imagen mediante una URL enviada en JSON
 router.post(
     '/:id/images',
     validarReferencia(Post, 'id', 'params'),
     buscarPostPorId,
     validarSchema(postImageSchema),
-    subirImagen.single("image"),
     createPostImage
+);
+
+// Subir un archivo físico mediante Multer
+router.post(
+    '/:id/images/upload',
+    buscarPostPorId,
+    validarSchema(postImageSchema),
+    subirImagen.single("image"),
+    uploadPostImage
 );
 
 // Eliminar una imagen de una publicación

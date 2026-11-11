@@ -13,6 +13,7 @@ const swaggerUi = require('swagger-ui-express');
 const commentRoutes = require("./routes/comment.routes");
 const postRoutes = require("./routes/post.routes")
 const postImagesRoutes = require("./routes/post_images.routes")
+const manejarErrorImagenes = require("./middlewares/manejarErrorImagenes")
 
 // 2. Validaciones tempranas de variables de entorno
 if (!process.env.MONGO_URI) {

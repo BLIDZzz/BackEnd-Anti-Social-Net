@@ -19,7 +19,13 @@ const postImageSchema = Joi.object({
     url: Joi.string().required().trim()
 });
 
+// Validar descripción del nuevo post
+const updatePostSchema = Joi.object({
+    description: Joi.string().required().trim(),
+});
+
 module.exports = {
     postSchema,
-    postImageSchema
+    postImageSchema,
+    updatePostSchema
 };

@@ -6,7 +6,9 @@ const {
     getPostById,
     createPost,
     updatePost,
-    deletePost
+    deletePost,
+    agregarTagPost,
+    eliminarTagPost
 } = require('../controllers/post.controller');
 
 const validarSchema = require('../middlewares/validarSchema');
@@ -50,6 +52,24 @@ router.delete(
     validarReferencia(require('../models/post'), 'id', 'params'),
     buscarPostPorId,
     deletePost
+);
+
+// Asociar un tag a una publicación
+router.post(
+    '/posts/:postId',
+    validarReferencia(Post, 'postId', 'params'),
+    buscarPostPorId,
+    validarReferencia(Tag, 'tagId'),
+    agregarTagPost
+);
+
+// Quitar un tag de una publicación
+router.delete(
+    '/posts/:postId/:tagId',
+    validarReferencia(Post, 'postId', 'params'),
+    validarReferencia(Tag, 'tagId', 'params'),
+    buscarPostPorId,
+    eliminarTagPost
 );
 
 module.exports = router;
