@@ -243,6 +243,8 @@ Los errores de Joi agregan el detalle en `error`:
 | `404` | El documento (o el referenciado en el body) no existe |
 | `500` | Error inesperado del servidor |
 
+Un body que no es JSON válido responde `400` y una ruta que no existe responde `404`, siempre en formato JSON.
+
 ## Modelo de datos: embebido vs. referenciado
 
 El diagrama del modelo documental está en [`assets/Diagrama.drawio.html`](./assets/Diagrama.drawio.html).
