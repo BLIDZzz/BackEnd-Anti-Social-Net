@@ -468,6 +468,77 @@
             }
           },
           "response": []
+        },
+        {
+          "name": "Caso de Error - Crear usuario con JSON mal formado",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400 en JSON', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{ \"nickName\": ",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "users"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Caso de Error - Ruta inexistente",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 404 en JSON', function () {",
+                  "    pm.response.to.have.status(404);",
+                  "    pm.response.to.be.json;",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/ruta-inexistente",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "ruta-inexistente"
+              ]
+            }
+          },
+          "response": []
         }
       ]
     },
@@ -982,8 +1053,8 @@
               "script": {
                 "type": "text/javascript",
                 "exec": [
-                  "pm.test('Responde 404', function () {",
-                  "    pm.response.to.have.status(404);",
+                  "pm.test('Responde 400', function () {",
+                  "    pm.response.to.have.status(400);",
                   "});"
                 ]
               }

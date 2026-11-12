@@ -6,6 +6,7 @@ const path = require("path");
 const connectDB = require("./config/database");
 const { connectRedis } = require("./config/redis");
 const invalidarCachePosts = require("./middlewares/invalidarCachePosts");
+const manejarErrores = require("./middlewares/manejarErrores");
 
 // 1. Importación de Rutas
 const userRoutes = require("./routes/userRoutes");
@@ -55,6 +56,14 @@ app.use('/posts', postImagesRoutes);
 
 // 4.1 Middleware para manejar errores de imágenes
 app.use(manejarErrorImagenes);
+
+// Rutas que no existen
+app.use((req, res) => {
+  res.status(404).json({ message: "Ruta no encontrada" });
+});
+
+// Errores no controlados
+app.use(manejarErrores);
 
 // 5. Función de inicio del servidor
 const startServer = async () => {

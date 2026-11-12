@@ -13,6 +13,8 @@ info:
 
     - Los comentarios con más de `COMMENT_MAX_AGE_MONTHS` meses no se muestran.
 
+    - Un body que no es JSON válido responde **400**; una ruta que no existe responde **404**; cualquier error inesperado responde **500**. Siempre en JSON.
+
     '
 servers:
 - url: http://localhost:3000
@@ -937,7 +939,7 @@ paths:
               example:
                 message: La imagen fue eliminada correctamente
         '400':
-          description: Id del post con formato inválido
+          description: Id del post o de la imagen con formato inválido
           content:
             application/json:
               schema:
@@ -945,7 +947,7 @@ paths:
                 - $ref: '#/components/schemas/Mensaje'
                 - $ref: '#/components/schemas/ErrorValidacion'
         '404':
-          description: El post no existe, o la imagen no existe en ese post (incluye un imageId con formato inválido)
+          description: El post o la imagen no existen
           content:
             application/json:
               schema:

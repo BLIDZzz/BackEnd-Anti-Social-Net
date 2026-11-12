@@ -1,6 +1,14 @@
+const mongoose = require('mongoose');
+
 const buscarImagenPost = async (req, res, next) => {
     try {
         const { imageId } = req.params;
+
+        if (!mongoose.Types.ObjectId.isValid(imageId)) {
+            return res.status(400).json({
+                message: 'El identificador de la imagen no tiene un formato válido.'
+            });
+        }
 
         // Buscar la imagen dentro de la publicación
         const imagen = req.post.images.id(imageId);
