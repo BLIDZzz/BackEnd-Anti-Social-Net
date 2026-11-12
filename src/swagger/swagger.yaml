@@ -1,185 +1,36 @@
 openapi: 3.0.3
 info:
-  title: API Red Social - TP2 MongoDB (UnaHur Anti-Social Net)
-  description: |
-    API REST para la segunda etapa del proyecto de red social.
-    Migración de persistencia relacional (Sequelize) a base de datos documental (MongoDB/Mongoose).
-    
-    **Notas de migración:**
-    - Los identificadores pasaron de enteros autoincrementales a `ObjectId` de MongoDB (cadenas hexadecimales de 24 caracteres).
-    - Los comentarios de más de X meses (configurado por variable de entorno `COMMENT_MAX_AGE_MONTHS`) son filtrados automáticamente en las respuestas.
+  title: UnaHur Anti-Social Net - TP2 (MongoDB)
   version: 2.0.0
+  description: 'API de la red social UnaHur Anti-Social Net con persistencia en MongoDB (Mongoose).
 
+
+    - Los identificadores son `ObjectId` de MongoDB (24 caracteres hexadecimales), no enteros como en el TP1.
+
+    - Un id con formato inválido responde **400**; un id válido que no existe responde **404**.
+
+    - Los errores se devuelven como `{ "message": "..." }`. Los errores de validación del body agregan el detalle en `error`.
+
+    - Los comentarios con más de `COMMENT_MAX_AGE_MONTHS` meses no se muestran.
+
+    '
 servers:
-  - url: http://localhost:{port}
-    description: Servidor Local de Desarrollo
-    variables:
-      port:
-        default: "3000"
-
-components:
-  schemas:
-    ObjectId:
-      type: string
-      pattern: '^[0-9a-fA-F]{24}$'
-      example: 65123456789abcdef0123456
-
-    User:
-      type: object
-      properties:
-        _id:
-          $ref: '#/components/schemas/ObjectId'
-        nickName:
-          type: string
-          example: alehki_dev
-        name:
-          type: string
-          example: Alejandro
-        email:
-          type: string
-          format: email
-          example: ale@example.com
-        createdAt:
-          type: string
-          format: date-time
-
-    Image:
-      type: object
-      properties:
-        _id:
-          $ref: '#/components/schemas/ObjectId'
-        url:
-          type: string
-          format: uri
-          example: https://cdn.ejemplo.com/posts/img123.png
-        uploadedAt:
-          type: string
-          format: date-time
-
-    Tag:
-      type: object
-      properties:
-        _id:
-          $ref: '#/components/schemas/ObjectId'
-        name:
-          type: string
-          example: nodejs
-        createdAt:
-          type: string
-          format: date-time
-
-    Comment:
-      type: object
-      properties:
-        _id:
-          $ref: '#/components/schemas/ObjectId'
-        user:
-          $ref: '#/components/schemas/User'
-        content:
-          type: string
-          example: Excelente actualización de la API.
-        createdAt:
-          type: string
-          format: date-time
-
-    Post:
-      type: object
-      properties:
-        _id:
-          $ref: '#/components/schemas/ObjectId'
-        user:
-          $ref: '#/components/schemas/User'
-        description:
-          type: string
-          example: Publicación de prueba sobre la migración a MongoDB Mongoose.
-        images:
-          type: array
-          items:
-            $ref: '#/components/schemas/Image'
-        tags:
-          type: array
-          items:
-            $ref: '#/components/schemas/Tag'
-        comments:
-          type: array
-          description: Comentarios embebidos (filtrados según antigüedad máxima configurada por ENV).
-          items:
-            $ref: '#/components/schemas/Comment'
-        createdAt:
-          type: string
-          format: date-time
-        updatedAt:
-          type: string
-          format: date-time
-
-    ErrorResponse:
-      type: object
-      properties:
-        status:
-          type: string
-          example: error
-        message:
-          type: string
-          example: El ID provisto no tiene un formato válido de MongoDB ObjectId.
-        details:
-          type: array
-          items:
-            type: string
-          example: ["\"nickName\" must be unique"]
-
+- url: http://localhost:3000
+  description: Servidor local
+tags:
+- name: Users
+- name: Followers (bonus 2)
+- name: Tags
+- name: Posts
+- name: Post_Images
+- name: Posts / Tags
+- name: Comments
 paths:
   /users:
-    post:
-      summary: Registrar un nuevo usuario
-      tags:
-        - Users
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - nickName
-                - name
-                - email
-              properties:
-                nickName:
-                  type: string
-                  minLength: 3
-                  maxLength: 30
-                  example: alehki_dev
-                name:
-                  type: string
-                  example: Alejandro
-                email:
-                  type: string
-                  format: email
-                  example: ale@example.com
-      responses:
-        '201':
-          description: Usuario creado exitosamente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: Datos de entrada inválidos o formato no soportado (Joi validation)
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
-          description: Conflict - El nickName ya existe en la base de datos
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
     get:
-      summary: Listar todos los usuarios
       tags:
-        - Users
+      - Users
+      summary: Listar usuarios
       responses:
         '200':
           description: Lista de usuarios
@@ -189,468 +40,405 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
-
-  /users/{id}:
-    get:
-      summary: Obtener usuario por ID
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+    post:
       tags:
-        - Users
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-      responses:
-        '200':
-          description: Datos del usuario
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/User'
-        '400':
-          description: ID con formato inválido
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Usuario no encontrado
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-    put:
-      summary: Actualizar un usuario existente
-      tags:
-        - Users
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
+      - Users
+      summary: Crear usuario
+      description: El `nickName` es obligatorio, de al menos 3 caracteres y no se puede repetir.
       requestBody:
         required: true
         content:
           application/json:
             schema:
               type: object
+              required:
+              - nickName
               properties:
                 nickName:
                   type: string
                   minLength: 3
-                  maxLength: 30
-                  example: alehki_dev
-                name:
-                  type: string
-                  example: Alejandro
-                email:
-                  type: string
-                  format: email
-                  example: ale@example.com
+            example:
+              nickName: guille
       responses:
-        '200':
-          description: Usuario actualizado exitosamente
+        '201':
+          description: Usuario creado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
         '400':
-          description: ID inválido o validación fallida
+          description: Datos inválidos o `nickName` repetido
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '404':
-          description: Usuario no encontrado
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '500':
+          description: Error interno del servidor
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
-          description: Conflicto - El nickName ya está en uso
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-    delete:
-      summary: Eliminar un usuario
-      tags:
-        - Users
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-      responses:
-        '200':
-          description: Usuario eliminado correctamente
-        '400':
-          description: ID inválido
-        '404':
-          description: Usuario no encontrado
-
-  /posts:
+                $ref: '#/components/schemas/Mensaje'
+  /users/{id}:
     get:
-      summary: Obtener todas las publicaciones
-      description: Devuelve las publicaciones con imágenes embebidas, etiquetas referenciadas y comentarios filtrados por antigüedad (virtual/query).
       tags:
-        - Posts
+      - Users
+      summary: Obtener un usuario
       parameters:
-        - name: tag
-          in: query
-          required: false
-          schema:
-            type: string
-          description: Filtrar publicaciones por nombre de etiqueta
-        - name: user
-          in: query
-          required: false
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-          description: Filtrar publicaciones por ID de usuario autor
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
       responses:
         '200':
-          description: Lista de publicaciones
+          description: Usuario
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El usuario no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+    put:
+      tags:
+      - Users
+      summary: Modificar un usuario
+      description: Se puede conservar el propio `nickName`; si pertenece a otro usuario responde 400.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - nickName
+              properties:
+                nickName:
+                  type: string
+                  minLength: 3
+            example:
+              nickName: guille2
+      responses:
+        '200':
+          description: Usuario modificado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Datos inválidos, id inválido o `nickName` en uso
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El usuario no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+    delete:
+      tags:
+      - Users
+      summary: Eliminar un usuario
+      description: Borra también sus posts, los comentarios que escribió, los comentarios de sus posts, y lo quita del `following` de quienes lo seguían.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Usuario eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                message: Usuario eliminado
+        '400':
+          description: Id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El usuario no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /users/{id}/follow:
+    post:
+      tags:
+      - Followers (bonus 2)
+      summary: Seguir a un usuario
+      description: '`followerId` pasa a seguir al usuario `{id}`.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Usuario a seguir
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - followerId
+              properties:
+                followerId:
+                  $ref: '#/components/schemas/ObjectId'
+                  description: Usuario que sigue
+            example:
+              followerId: 6aed037ed933a58293f9818d
+      responses:
+        '200':
+          description: Usuario seguido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                message: Usuario seguido
+        '400':
+          description: Datos inválidos, id inválido, seguirse a sí mismo o ya lo sigue
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El usuario o el seguidor no existen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /users/{id}/unfollow:
+    delete:
+      tags:
+      - Followers (bonus 2)
+      summary: Dejar de seguir a un usuario
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Usuario a dejar de seguir
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - followerId
+              properties:
+                followerId:
+                  $ref: '#/components/schemas/ObjectId'
+                  description: Usuario que sigue
+            example:
+              followerId: 6aed037ed933a58293f9818d
+      responses:
+        '200':
+          description: Dejó de seguir
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                message: Dejó de seguir al usuario
+        '400':
+          description: Datos inválidos, id inválido o no lo seguía
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El usuario o el seguidor no existen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /users/{id}/followers:
+    get:
+      tags:
+      - Followers (bonus 2)
+      summary: Listar seguidores
+      description: Usuarios que siguen a `{id}`.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Seguidores
           content:
             application/json:
               schema:
                 type: array
                 items:
-                  $ref: '#/components/schemas/Post'
-
-    post:
-      summary: Crear una nueva publicación
-      tags:
-        - Posts
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - user
-                - description
-              properties:
-                user:
-                  $ref: '#/components/schemas/ObjectId'
-                description:
-                  type: string
-                  minLength: 1
-                  example: Publicación inicial con la API en Node + Mongo.
-                images:
-                  type: array
-                  items:
-                    type: object
-                    required:
-                      - url
-                    properties:
-                      url:
-                        type: string
-                        format: uri
-                tags:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/ObjectId'
-      responses:
-        '201':
-          description: Publicación creada exitosamente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Post'
+                  $ref: '#/components/schemas/UserResumen'
         '400':
-          description: Validación fallida (campos requeridos faltantes o ID de usuario/tag inválido)
+          description: Id con formato inválido
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
         '404':
-          description: El usuario o alguna etiqueta especificada no existen
+          description: El usuario no existe
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-  /posts/{id}:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /users/{id}/following:
     get:
-      summary: Obtener publicación por ID
       tags:
-        - Posts
+      - Followers (bonus 2)
+      summary: Listar seguidos
+      description: Usuarios a los que sigue `{id}`.
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-      responses:
-        '200':
-          description: Detalle de la publicación
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Post'
-        '400':
-          description: ID inválido
-        '404':
-          description: Publicación no encontrada
-
-    put:
-      summary: Actualizar una publicación existente
-      tags:
-        - Posts
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-      requestBody:
+      - name: id
+        in: path
         required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              properties:
-                description:
-                  type: string
-                  minLength: 1
-                  example: Descripción actualizada.
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
       responses:
         '200':
-          description: Publicación actualizada exitosamente
+          description: Seguidos
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
+                type: array
+                items:
+                  $ref: '#/components/schemas/UserResumen'
         '400':
-          description: ID inválido o datos incorrectos
+          description: Id con formato inválido
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
         '404':
-          description: Publicación no encontrada
+          description: El usuario no existe
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-
-    delete:
-      summary: Eliminar una publicación
-      tags:
-        - Posts
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-      responses:
-        '200':
-          description: Publicación eliminada exitosamente
-        '400':
-          description: ID inválido
-        '404':
-          description: Publicación no encontrada
-
-  /posts/{id}/images:
-    post:
-      summary: Agregar imágenes a una publicación existente
-      tags:
-        - Posts / Images
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - images
-              properties:
-                images:
-                  type: array
-                  items:
-                    type: object
-                    required:
-                      - url
-                    properties:
-                      url:
-                        type: string
-                        format: uri
-      responses:
-        '200':
-          description: Imágenes agregadas correctamente
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Post'
-        '400':
-          description: Formato de URL o ID inválido
-        '404':
-          description: Publicación no encontrada
-
-  /posts/{id}/images/{imageId}:
-    delete:
-      summary: Quitar una imagen de una publicación
-      tags:
-        - Posts / Images
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-        - name: imageId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-      responses:
-        '200':
-          description: Imagen removida correctamente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Post'
-        '400':
-          description: IDs inválidos
-        '404':
-          description: Publicación o Imagen no encontrada
-          
-  /posts/{id}/comments:
-    post:
-      summary: Agregar un comentario a una publicación
-      tags:
-        - Posts / Comments
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - user
-                - content
-              properties:
-                user:
-                  $ref: '#/components/schemas/ObjectId'
-                content:
-                  type: string
-                  minLength: 1
-                  example: ¡Muy buen post!
-      responses:
-        '201':
-          description: Comentario agregado exitosamente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Post'
-        '400':
-          description: Validación fallida (Joi / ObjectId inválido)
-        '404':
-          description: Publicación o Usuario no existe
-
-  /posts/{id}/tags:
-    post:
-      summary: Asociar etiquetas a una publicación
-      tags:
-        - Posts / Tags
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              required:
-                - tags
-              properties:
-                tags:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/ObjectId'
-      responses:
-        '200':
-          description: Etiquetas asociadas correctamente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Post'
-        '400':
-          description: Datos inválidos
-        '404':
-          description: Publicación o una de las etiquetas no existe
-
-  /posts/{id}/tags/{tagId}:
-    delete:
-      summary: Desasociar una etiqueta de una publicación
-      tags:
-        - Posts / Tags
-      parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-        - name: tagId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
-      responses:
-        '200':
-          description: Etiqueta desasociada correctamente
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/Post'
-        '400':
-          description: IDs inválidos
-        '404':
-          description: Publicación o Etiqueta no encontrada en el post
-
+                $ref: '#/components/schemas/Mensaje'
   /tags:
     get:
-      summary: Listar todas las etiquetas
       tags:
-        - Tags
+      - Tags
+      summary: Listar tags
       responses:
         '200':
-          description: Lista de etiquetas registradas
+          description: Lista de tags
           content:
             application/json:
               schema:
                 type: array
                 items:
                   $ref: '#/components/schemas/Tag'
-
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
     post:
-      summary: Crear una nueva etiqueta
       tags:
-        - Tags
+      - Tags
+      summary: Crear tag
+      description: El nombre no se puede repetir.
       requestBody:
         required: true
         content:
@@ -658,57 +446,83 @@ paths:
             schema:
               type: object
               required:
-                - name
+              - name
               properties:
                 name:
                   type: string
-                  minLength: 2
-                  example: mongodb
+            example:
+              name: deportes
       responses:
         '201':
-          description: Etiqueta creada exitosamente
+          description: Tag creado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tag'
         '400':
-          description: Validación fallida
-        '409':
-          description: La etiqueta ya existe
-
+          description: Datos inválidos o nombre repetido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
   /tags/{id}:
     get:
-      summary: Obtener etiqueta por ID
       tags:
-        - Tags
+      - Tags
+      summary: Obtener un tag
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
       responses:
         '200':
-          description: Datos de la etiqueta
+          description: Tag
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tag'
         '400':
-          description: ID inválido
+          description: Id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
         '404':
-          description: Etiqueta no encontrada
-
+          description: El tag no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
     put:
-      summary: Actualizar una etiqueta
       tags:
-        - Tags
+      - Tags
+      summary: Modificar un tag
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
       requestBody:
         required: true
         content:
@@ -716,49 +530,106 @@ paths:
             schema:
               type: object
               required:
-                - name
+              - name
               properties:
                 name:
                   type: string
-                  minLength: 2
-                  example: mongoose
+            example:
+              name: futbol
       responses:
         '200':
-          description: Etiqueta actualizada correctamente
+          description: Tag modificado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Tag'
         '400':
-          description: ID o datos inválidos
+          description: Datos inválidos, id inválido o nombre en uso
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
         '404':
-          description: Etiqueta no encontrada
-        '409':
-          description: Conflicto - El nombre de la etiqueta ya existe
-
+          description: El tag no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
     delete:
-      summary: Eliminar una etiqueta
       tags:
-        - Tags
+      - Tags
+      summary: Eliminar un tag
+      description: Lo quita del array `tags` de los posts que lo tenían.
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
       responses:
         '200':
-          description: Etiqueta eliminada correctamente
+          description: Tag eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                message: Tag eliminado
         '400':
-          description: ID inválido
+          description: Id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
         '404':
-          description: Etiqueta no encontrada
-
-  /comments:
-    post:
-      summary: Crear un comentario (general/independiente)
+          description: El tag no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /posts:
+    get:
       tags:
-        - Comments
+      - Posts
+      summary: Listar posts
+      description: Cada post incluye sus imágenes, sus tags (`{ _id, name }`) y solo sus comentarios visibles. La respuesta se guarda en una caché de Redis por 60 segundos (bonus 3); cualquier POST, PUT o DELETE la invalida.
+      responses:
+        '200':
+          description: Lista de posts
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/PostCompleto'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+    post:
+      tags:
+      - Posts
+      summary: Crear post
+      description: La descripción es obligatoria y el usuario tiene que existir.
       requestBody:
         required: true
         content:
@@ -766,39 +637,506 @@ paths:
             schema:
               type: object
               required:
-                - user
-                - content
+              - description
+              - user
               properties:
+                description:
+                  type: string
                 user:
                   $ref: '#/components/schemas/ObjectId'
-                content:
-                  type: string
-                  minLength: 1
-                  example: Comentario general.
+            example:
+              description: Mi primer post
+              user: 6aecff2cf8e3b5e2de7be2b8
       responses:
         '201':
-          description: Comentario creado con éxito
+          description: Post creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Datos inválidos o id de usuario inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El usuario no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /posts/{id}:
+    get:
+      tags:
+      - Posts
+      summary: Obtener un post
+      description: Incluye imágenes, tags (`{ _id, name }`) y solo los comentarios visibles.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Post
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PostCompleto'
+        '400':
+          description: Id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El post no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+    put:
+      tags:
+      - Posts
+      summary: Modificar la descripción de un post
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - description
+              properties:
+                description:
+                  type: string
+            example:
+              description: Nueva descripción
+      responses:
+        '200':
+          description: Post modificado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Post'
+        '400':
+          description: Datos inválidos o id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El post no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+    delete:
+      tags:
+      - Posts
+      summary: Eliminar un post
+      description: Borra también sus comentarios. Las imágenes se borran con él porque están embebidas.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Post eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                message: La publicación fue eliminada correctamente
+        '400':
+          description: Id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El post no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /posts/{id}/images:
+    post:
+      tags:
+      - Post_Images
+      summary: Agregar una imagen por URL
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - url
+              properties:
+                url:
+                  type: string
+            example:
+              url: https://example.com/foto.jpg
+      responses:
+        '201':
+          description: Imagen agregada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+        '400':
+          description: Datos inválidos o id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El post no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /posts/{id}/images/upload:
+    post:
+      tags:
+      - Post_Images
+      summary: Subir un archivo de imagen (bonus 1)
+      description: 'Formatos permitidos: jpeg, png y webp. Tamaño máximo: 5 MB. El archivo se guarda en `src/uploads/posts` y se sirve en `/uploads/posts/<archivo>`.'
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              required:
+              - image
+              properties:
+                image:
+                  type: string
+                  format: binary
+      responses:
+        '201':
+          description: Imagen subida
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Image'
+        '400':
+          description: Sin archivo, formato no permitido, más de 5 MB o id inválido
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '404':
+          description: El post no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /posts/{id}/images/{imageId}:
+    delete:
+      tags:
+      - Post_Images
+      summary: Quitar una imagen de un post
+      description: Si la imagen fue subida al servidor, también se borra el archivo.
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      - name: imageId
+        in: path
+        required: true
+        description: Id de la imagen dentro del post
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Imagen eliminada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                message: La imagen fue eliminada correctamente
+        '400':
+          description: Id del post con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El post no existe, o la imagen no existe en ese post (incluye un imageId con formato inválido)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /posts/{id}/tags:
+    post:
+      tags:
+      - Posts / Tags
+      summary: Asociar un tag a un post
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - tagId
+              properties:
+                tagId:
+                  $ref: '#/components/schemas/ObjectId'
+            example:
+              tagId: 6aed0a852ca9b37621264218
+      responses:
+        '201':
+          description: Tag asociado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ObjectId'
+        '400':
+          description: Id inválido o el tag ya estaba asociado
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El post o el tag no existen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /posts/{id}/tags/{tagId}:
+    delete:
+      tags:
+      - Posts / Tags
+      summary: Quitar un tag de un post
+      parameters:
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      - name: tagId
+        in: path
+        required: true
+        description: Id del tag
+        schema:
+          $ref: '#/components/schemas/ObjectId'
+      responses:
+        '200':
+          description: Tag quitado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  tags:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ObjectId'
+        '400':
+          description: Id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El post o el tag no existen, o el tag no estaba asociado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+  /comments:
+    post:
+      tags:
+      - Comments
+      summary: Crear comentario
+      description: El usuario y el post tienen que existir.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - text
+              - user
+              - post
+              properties:
+                text:
+                  type: string
+                user:
+                  $ref: '#/components/schemas/ObjectId'
+                post:
+                  $ref: '#/components/schemas/ObjectId'
+            example:
+              text: Muy buen post
+              user: 6aecff2cf8e3b5e2de7be2b8
+              post: 6aed1c2a9b8f7e6d5c4b3a21
+      responses:
+        '201':
+          description: Comentario creado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
         '400':
-          description: Datos de entrada inválidos
-
+          description: Datos inválidos o id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
+        '404':
+          description: El usuario o el post no existen
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
   /comments/post/{postId}:
     get:
-      summary: Obtener comentarios de una publicación específica
       tags:
-        - Comments
+      - Comments
+      summary: Listar los comentarios visibles de un post
+      description: Solo devuelve los comentarios con menos de `COMMENT_MAX_AGE_MONTHS` meses.
       parameters:
-        - name: postId
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
+      - name: postId
+        in: path
+        required: true
+        description: Id del post
+        schema:
+          $ref: '#/components/schemas/ObjectId'
       responses:
         '200':
-          description: Lista de comentarios filtrados por antigüedad máxima
+          description: Comentarios visibles
           content:
             application/json:
               schema:
@@ -806,21 +1144,37 @@ paths:
                 items:
                   $ref: '#/components/schemas/Comment'
         '400':
-          description: ID de post inválido
+          description: Id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
         '404':
-          description: Publicación no encontrada
-
+          description: El post no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
   /comments/{id}:
     put:
-      summary: Actualizar un comentario
       tags:
-        - Comments
+      - Comments
+      summary: Modificar un comentario
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
       requestBody:
         required: true
         content:
@@ -828,38 +1182,210 @@ paths:
             schema:
               type: object
               required:
-                - content
+              - text
               properties:
-                content:
+                text:
                   type: string
-                  minLength: 1
-                  example: Contenido editado del comentario.
+            example:
+              text: Texto editado
       responses:
         '200':
-          description: Comentario actualizado correctamente
+          description: Comentario modificado
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/Comment'
         '400':
-          description: ID o contenido inválido
+          description: Datos inválidos o id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
         '404':
-          description: Comentario no encontrado
-
+          description: El comentario no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
     delete:
-      summary: Eliminar un comentario
       tags:
-        - Comments
+      - Comments
+      summary: Eliminar un comentario
       parameters:
-        - name: id
-          in: path
-          required: true
-          schema:
-            $ref: '#/components/schemas/ObjectId'
+      - name: id
+        in: path
+        required: true
+        description: Identificador (ObjectId)
+        schema:
+          $ref: '#/components/schemas/ObjectId'
       responses:
         '200':
-          description: Comentario eliminado correctamente
+          description: Comentario eliminado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+              example:
+                message: Comentario eliminado exitosamente
         '400':
-          description: ID inválido
+          description: Id con formato inválido
+          content:
+            application/json:
+              schema:
+                oneOf:
+                - $ref: '#/components/schemas/Mensaje'
+                - $ref: '#/components/schemas/ErrorValidacion'
         '404':
-          description: Comentario no encontrado
+          description: El comentario no existe
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+        '500':
+          description: Error interno del servidor
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Mensaje'
+components:
+  schemas:
+    ObjectId:
+      type: string
+      pattern: ^[0-9a-fA-F]{24}$
+      example: 6aecff2cf8e3b5e2de7be2b8
+    Mensaje:
+      type: object
+      properties:
+        message:
+          type: string
+      example:
+        message: No se encontró ningún registro asociado al id proporcionado.
+    ErrorValidacion:
+      type: object
+      description: Error de validación del body con Joi
+      properties:
+        message:
+          type: string
+          example: Datos inválidos
+        error:
+          type: string
+          example: '"nickName" length must be at least 3 characters long'
+    User:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        nickName:
+          type: string
+          example: guille
+        following:
+          type: array
+          description: Ids de los usuarios que sigue (bonus 2)
+          items:
+            $ref: '#/components/schemas/ObjectId'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    UserResumen:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        nickName:
+          type: string
+          example: guille
+    Tag:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        name:
+          type: string
+          example: deportes
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Image:
+      type: object
+      description: Subdocumento embebido en el post
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        url:
+          type: string
+          example: https://example.com/foto.jpg
+    Comment:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        text:
+          type: string
+          example: Muy buen post
+        user:
+          description: Id del usuario, o `{ _id, nickName }` cuando se lista
+          oneOf:
+          - $ref: '#/components/schemas/ObjectId'
+          - $ref: '#/components/schemas/UserResumen'
+        post:
+          $ref: '#/components/schemas/ObjectId'
+        isVisible:
+          type: boolean
+          description: 'Calculado: true si tiene menos de COMMENT_MAX_AGE_MONTHS meses. No se guarda en la base.'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    Post:
+      type: object
+      properties:
+        _id:
+          $ref: '#/components/schemas/ObjectId'
+        description:
+          type: string
+          example: Mi primer post
+        user:
+          $ref: '#/components/schemas/ObjectId'
+        images:
+          type: array
+          items:
+            $ref: '#/components/schemas/Image'
+        tags:
+          type: array
+          description: Ids de tags (en GET se completan con `{ _id, name }`)
+          items:
+            oneOf:
+            - $ref: '#/components/schemas/ObjectId'
+            - $ref: '#/components/schemas/Tag'
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    PostCompleto:
+      allOf:
+      - $ref: '#/components/schemas/Post'
+      - type: object
+        properties:
+          comments:
+            type: array
+            description: Solo los comentarios visibles
+            items:
+              $ref: '#/components/schemas/Comment'
