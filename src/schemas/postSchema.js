@@ -24,8 +24,14 @@ const updatePostSchema = Joi.object({
     description: Joi.string().required().trim(),
 });
 
+// Validar el tag que se asocia a una publicacion
+const tagPostSchema = Joi.object({
+    tagId: Joi.string().required().trim()
+});
+
 module.exports = {
     postSchema,
     postImageSchema,
-    updatePostSchema
+    updatePostSchema,
+    tagPostSchema
 };

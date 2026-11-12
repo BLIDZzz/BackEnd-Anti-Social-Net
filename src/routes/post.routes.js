@@ -19,7 +19,7 @@ const validarSchema = require('../middlewares/validarSchema');
 const validarReferencia = require('../middlewares/validarReferencia');
 const buscarPostPorId = require('../middlewares/buscarPostPorId');
 
-const { postSchema, updatePostSchema } = require('../schemas/postSchema');
+const { postSchema, updatePostSchema, tagPostSchema } = require('../schemas/postSchema');
 
 // Obtener todas las publicaciones
 router.get('/', getAllPosts);
@@ -62,6 +62,7 @@ router.post(
     '/:id/tags',
     validarReferencia(Post, 'id', 'params'),
     buscarPostPorId,
+    validarSchema(tagPostSchema),
     validarReferencia(Tag, 'tagId'),
     agregarTagPost
 );
