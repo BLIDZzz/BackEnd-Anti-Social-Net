@@ -16,6 +16,7 @@ Backend de la red social **UnaHur Anti-Social Net**, segunda etapa: la misma API
 
 - **Node.js** y **Express 5**
 - **MongoDB 8** (con Docker) y **Mongoose 9**
+- **Redis** para la caché de los posts (bonus 3)
 - **Joi** para validar los datos que llegan en el body
 - **dotenv** para las variables de entorno
 - **swagger-ui-express** y **js-yaml** para la documentación
@@ -24,7 +25,7 @@ Backend de la red social **UnaHur Anti-Social Net**, segunda etapa: la misma API
 ## Requisitos
 
 - [Node.js](https://nodejs.org/) y npm
-- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (para levantar MongoDB)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/) (para levantar MongoDB y Redis)
 - git
 
 ## Cómo levantar el proyecto desde cero
@@ -45,11 +46,12 @@ Crear un archivo `.env` en la raíz del proyecto (si no existe) con este conteni
 PORT=3000
 MONGO_URI=mongodb://localhost:27017/unaHur
 COMMENT_MAX_AGE_MONTHS=6
+REDIS_URL=redis://localhost:6379
 ```
 
-### 3. Levantar MongoDB con Docker
+### 3. Levantar MongoDB y Redis con Docker
 
-En la raíz del proyecto está el archivo `compose.yaml`, que levanta MongoDB y **mongo-express** (una interfaz web para ver la base):
+En la raíz del proyecto está el archivo `compose.yaml`, que levanta MongoDB, **mongo-express** (una interfaz web para ver la base) y **Redis** (para la caché):
 
 ```yaml
 services:
@@ -70,6 +72,11 @@ services:
     depends_on:
       - mongodb
 
+  redis:
+    image: redis:7
+    ports:
+      - "127.0.0.1:6379:6379"
+
 volumes:
   mongodb_data:
 ```
@@ -88,7 +95,7 @@ docker compose ps
 
 mongo-express queda disponible en `http://localhost:8081`.
 
-> Si ya tenés MongoDB instalado localmente en el puerto 27017, podés saltear este paso.
+> Si ya tenés MongoDB (puerto 27017) y Redis (puerto 6379) instalados localmente, podés saltear este paso.
 
 ### 4. Iniciar el servidor
 
@@ -100,6 +107,7 @@ La consola tiene que mostrar:
 
 ```
 MongoDB conectado exitosamente
+Redis conectado exitosamente
 Servidor escuchando en http://localhost:3000
 ```
 
@@ -110,6 +118,7 @@ La base `unaHur` y sus colecciones se crean solas la primera vez que se guarda u
 - **`ECONNREFUSED 127.0.0.1:27017`**: MongoDB no está corriendo. Abrir Docker Desktop y ejecutar `docker compose up -d`.
 - **`ECONNREFUSED ::1:27017`**: en algunas versiones de Node, `localhost` se resuelve a IPv6. Cambiar `localhost` por `127.0.0.1` en `MONGO_URI`.
 - **`Cannot find module ...`**: faltan dependencias. Ejecutar `npm install`.
+- **`ECONNREFUSED 127.0.0.1:6379`**: Redis no está corriendo. Ejecutar `docker compose up -d`.
 
 ## Variables de entorno
 
@@ -118,6 +127,7 @@ La base `unaHur` y sus colecciones se crean solas la primera vez que se guarda u
 | `PORT` | Puerto en el que escucha el servidor. Si no se define, usa `3000`. | `3000` |
 | `MONGO_URI` | Cadena de conexión a MongoDB (incluye el nombre de la base). Obligatoria. | `mongodb://localhost:27017/unaHur` |
 | `COMMENT_MAX_AGE_MONTHS` | Antigüedad máxima, en meses, de los comentarios que se muestran. Tiene que ser un entero positivo. | `6` |
+| `REDIS_URL` | Dirección del servidor de Redis usado como caché. | `redis://localhost:6379` |
 
 El servidor no arranca si falta `MONGO_URI` o si `COMMENT_MAX_AGE_MONTHS` no es un entero positivo.
 
@@ -192,6 +202,9 @@ Un usuario no puede seguirse a sí mismo ni seguir dos veces al mismo usuario (r
 | DELETE | `/posts/:id` | Elimina un post y sus comentarios | — |
 | POST | `/posts/:id/images` | Agrega una imagen a un post | `{ "url": "https://..." }` |
 | DELETE | `/posts/:id/images/:imageId` | Quita una imagen de un post | — |
+| POST | `/posts/:id/images/upload` | Sube un archivo de imagen al servidor (bonus 1; campo `image`, form-data) | archivo |
+| POST | `/posts/:id/tags` | Asocia un tag a un post | `{ "tagId": "<id de tag>" }` |
+| DELETE | `/posts/:id/tags/:tagId` | Quita un tag de un post | — |
 
 ### Comentarios — `/comments`
 
@@ -335,3 +348,29 @@ En el TP1 (Sequelize) la relación era una **tabla intermedia** `UserFollowers` 
 | Al borrar un usuario | `ON DELETE CASCADE` borra sus filas automáticamente | La aplicación lo quita de los arrays |
 
 **Límite de esta solución:** si un usuario siguiera a muchísimas personas, el array podría crecer hasta acercarse al límite de 16 MB por documento. Para una red social real con ese volumen, convendría una colección aparte `follows` con un documento por relación (`{ follower, following }`), que es lo más parecido a la tabla intermedia del modelo relacional.
+
+## Bonus 3: caché de posts con Redis
+
+La información de los posts cambia poco, pero `GET /posts` es una consulta pesada: trae todos los posts, completa sus tags y busca los comentarios visibles de cada uno. Para no repetirla en cada pedido, guardamos el resultado en **Redis**, una base de datos clave-valor que trabaja en memoria y responde mucho más rápido que MongoDB.
+
+### Cómo funciona
+
+1. Al recibir `GET /posts`, se busca la clave `posts` en Redis.
+2. Si existe, se responde directamente con ese valor, sin consultar MongoDB.
+3. Si no existe, se consulta MongoDB, se responde y se guarda el resultado en Redis con un vencimiento de **60 segundos** (`EX: 60`).
+
+### Cómo se mantiene actualizada
+
+Si un post cambia, la caché podría mostrar datos viejos. Para evitarlo, el middleware `invalidarCachePosts` borra la clave `posts` en cualquier pedido que modifique datos (`POST`, `PUT` o `DELETE`), en cualquier ruta. Se borra ante cualquier cambio y no solo en `/posts` porque el listado de posts incluye información de otras entidades: los nombres de los tags, los comentarios y el `nickName` de quien comentó.
+
+El vencimiento de 60 segundos funciona como respaldo: aunque algo no se invalide, el dato viejo dura como máximo un minuto.
+
+### Cómo comprobarlo
+
+Después de un `GET /posts`, se puede ver cuánto le queda a la caché:
+
+```bash
+docker compose exec redis redis-cli TTL posts
+```
+
+Devuelve los segundos restantes, o `-2` si la clave no existe (por ejemplo, después de crear o modificar algo).
