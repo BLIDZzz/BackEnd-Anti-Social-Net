@@ -5,6 +5,7 @@ const fs = require("fs");
 const path = require("path"); 
 const connectDB = require("./config/database");
 const { connectRedis } = require("./config/redis");
+const invalidarCachePosts = require("./middlewares/invalidarCachePosts");
 
 // 1. Importación de Rutas
 const userRoutes = require("./routes/userRoutes");
@@ -34,6 +35,8 @@ const swaggerDocument = YAML.load(
 );
 
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
+
+app.use(invalidarCachePosts);
 
 app.locals.commentMaxAgeMonths = COMMENT_MAX_AGE_MONTHS;
 

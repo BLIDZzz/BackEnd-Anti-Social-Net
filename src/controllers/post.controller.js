@@ -1,9 +1,15 @@
+const { client } = require('../config/redis');
 const Post = require('../models/post');
 const Comment = require('../models/comment');
 
 // Obtener todas las publicaciones con sus tags y comentarios visibles
 const getAllPosts = async (req, res) => {
     try {
+        // Si los posts están en la caché, responder desde Redis
+        const cache = await client.get('posts');
+        if (cache) {
+            return res.status(200).json(JSON.parse(cache));
+        }
         // Obtener todas las publicaciones y completar los datos de sus tags
         const posts = await Post.find().populate('tags', 'name');
 
@@ -28,7 +34,9 @@ const getAllPosts = async (req, res) => {
                 };
             })
         );
-
+        
+        // Guardar el resultado en la caché por 60 segundos
+        await client.set('posts', JSON.stringify(postsConComentarios), { EX: 60 });
         return res.status(200).json(postsConComentarios);
 
     } catch (error) {
