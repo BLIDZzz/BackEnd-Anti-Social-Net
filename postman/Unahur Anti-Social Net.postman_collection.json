@@ -1947,6 +1947,47 @@
           "response": []
         },
         {
+          "name": "Caso de Error - Asignar un tag sin tagId",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('Responde 400', function () {",
+                  "    pm.response.to.have.status(400);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/posts/{{postId}}/tags",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "posts",
+                "{{postId}}",
+                "tags"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
           "name": "Caso de Error - Asignar un tag a un Post inexistente",
           "event": [
             {
