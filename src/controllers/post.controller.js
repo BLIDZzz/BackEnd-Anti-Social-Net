@@ -132,7 +132,7 @@ const agregarTagPost = async (req, res) => {
         );
 
         if (yaExiste) {
-            return res.status(409).json({
+            return res.status(400).json({
                 message: 'El tag ya está asociado a esta publicación'
             });
         }

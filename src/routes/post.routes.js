@@ -60,7 +60,7 @@ router.delete(
 // Asociar un tag a una publicación
 router.post(
     '/:id/tags',
-    validarReferencia(Post, 'postId', 'params'),
+    validarReferencia(Post, 'id', 'params'),
     buscarPostPorId,
     validarReferencia(Tag, 'tagId'),
     agregarTagPost
@@ -69,7 +69,7 @@ router.post(
 // Quitar un tag de una publicación
 router.delete(
     '/:id/tags/:tagId',
-    validarReferencia(Post, 'postId', 'params'),
+    validarReferencia(Post, 'id', 'params'),
     validarReferencia(Tag, 'tagId', 'params'),
     buscarPostPorId,
     eliminarTagPost
