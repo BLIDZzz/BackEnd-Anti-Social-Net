@@ -18,6 +18,9 @@ const postRoutes = require("./routes/post.routes")
 const postImagesRoutes = require("./routes/post_images.routes")
 const manejarErrorImagenes = require("./middlewares/manejarErrorImagenes")
 
+// 1.1. Importación de cors 
+const cors = require('cors')
+
 // 2. Validaciones tempranas de variables de entorno
 if (!process.env.MONGO_URI) {
   throw new Error("MONGO_URI no está definido en el archivo .env");
@@ -40,6 +43,9 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 app.use(invalidarCachePosts);
 
 app.locals.commentMaxAgeMonths = COMMENT_MAX_AGE_MONTHS;
+
+// 2.1. Permitir acceso a FrontEnd
+app.use(cors({ origin: 'http://localhost:5173' }))
 
 // 3. Middlewares globales (¡SIEMPRE antes de las rutas!)
 app.use(express.json());
